@@ -8,6 +8,13 @@ import MyAwesomeReactComponent from './RaiseBtn';
 import RaisedButton from 'material-ui/RaisedButton';
 import TextField from 'material-ui/TextField';
 // import RaisedButton from 'material-ui/RaisedButton';
+import {List, ListItem} from 'material-ui/List';
+import Checkbox from 'material-ui/Checkbox';
+
+const style = {
+   float: 'left',
+};
+
 
 var TodoList = React.createClass({
   getInitialState:function() {
@@ -23,10 +30,7 @@ var TodoList = React.createClass({
   render:function() {
     return(
       <div>
-        <MuiThemeProvider muiTheme={getMuiTheme()}>
-          <MyAwesomeReactComponent />
-      </MuiThemeProvider>
-        <TypeNew todo = {this.state.todolist} add ={this.handleChange}/>
+          <TypeNew todo = {this.state.todolist} add ={this.handleChange}/>
           <ListTodo todo = {this.state.todolist} change={this.handleChange}/>
           <DeleBtn todo = {this.state.todolist} change ={this.handleChange}/>
       </div>
@@ -83,18 +87,18 @@ var ListTodo = React.createClass({
   },
   handleDel:function(e) {
     var rows = this.props.todo;
-    var index = e.target.getAttaribute("data-index");
+    var index = e.target.getAttaribute("dataIndex");
     rows.splice(index,1);
     this.props.change(rows);
     this.setState({
       changenum:-1
     });
   },
-  handleChange:function(e) {
-    var index = e.target.getAttribute("data-index");
-    var msg = this.props.todo[index];
+   handleChange:function(i,e) {
+    // var index = e.target.getAttribute("dataIndex");
+    var msg = this.props.todo[i];
     this.setState({
-      changenum: index,
+      changenum: i,
       changevalue: msg.item
     });
   },
@@ -102,12 +106,11 @@ var ListTodo = React.createClass({
       this.setState({
 
           changevalue:e.target.value
-      })
+      });
   },
-  handleFinished:function(e) {
+  handleFinished:function(i,e) {
     var rows = this.props.todo;
-    var index=  e.target.getAttribute("data-index");
-    var item = this.props.todo[index];
+    var item = this.props.todo[i];
     item.isFinished  = !item.isFinished;
     this.props.change(rows);
     this.setState({
@@ -115,9 +118,8 @@ var ListTodo = React.createClass({
     });
   },
   handleSave:function() {
-
     var inputDom = this.refs.inputnew;
-    var newthing = inputDom.value.trim();
+    var newthing = this.state.changevalue;
     var rows =this.props.todo;
     if (newthing == "") {
         alert("数据不能为空");
@@ -137,28 +139,34 @@ var ListTodo = React.createClass({
       <ul id= "todolist">
         {
           this.props.todo.map(function(item, i ){
+
               if (this.state .changenum == i) {
                   return (
-                    <li>
-                      <input type = "text" ref = "inputnew" value ={this.state.changevalue} onChange = {this.handleText}/>
-                      <button onClick ={this.handleSave}>OK</button>
-                    </li>
+                    <MuiThemeProvider muiTheme={getMuiTheme()}>
+                    <List>
+                      <TextField  value={this.state.changevalue} ref="inputnew" onChange={this.handleText} hintText="" autoFocus/>
+                      <RaisedButton primary={true} label ="完成" onClick ={this.handleSave}/>
+                    </List>
+                    </MuiThemeProvider>
                   )
               }else {
                 if (item.isFinished) {
                     return(
-                      <li>
-                        <span className = "ItemText" onClick={this.handleFinished} data-index ={i}>{item.item}</span>
-                        <button onClick ={this.handleChange} data-index={i}>edit</button>
-                      </li>
+                      <MuiThemeProvider muiTheme={getMuiTheme()}>
+                      <List>
+                        <ListItem style={style} className = "ItemText" leftCheckbox={<Checkbox checked={item.isFinished}/>} onClick={this.handleFinished.bind(this,i)} dataIndex ={i} primaryText={item.item}/>
+                        <RaisedButton  primary={true} label ="编辑" onClick={this.handleChange.bind(this,i)} dataIndex={i}/>
+                      </List>
+                      </MuiThemeProvider>
                     );
                 }else {
                   return(
-                    <li>
-
-                      <span onClick= {this.handleFinished} data-index = {i}>{item.item}</span>
-                      <button onClick={this.handleChange} data-index={i}>edit</button>
-                    </li>
+                    <MuiThemeProvider muiTheme={getMuiTheme()}>
+                    <List >
+                      <ListItem  style={style} leftCheckbox={<Checkbox checked={item.isFinished} />} onClick={this.handleFinished.bind(this,i)} dataIndex ={i} primaryText={item.item}/>
+                      <RaisedButton  primary={true} label ="编辑" onClick={this.handleChange.bind(this,i)} dataIndex={i}/>
+                    </List>
+                    </MuiThemeProvider>
                   );
                 }
               }
@@ -179,7 +187,9 @@ var DeleBtn = React.createClass({
     },
     render:function() {
       return (
-        <button onClick = {this.handleDeleteFinished}>deleteOldData</button>
+        <MuiThemeProvider muiTheme={getMuiTheme()}>
+        <RaisedButton primary={true} label ="删除过期数据" onClick = {this.handleDeleteFinished}/>
+        </MuiThemeProvider>
       );
     }
 });
